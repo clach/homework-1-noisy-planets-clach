@@ -67,13 +67,12 @@ void main()
     lightPos.z = 10.0 * cos(float(u_Time) * 3.14159 * 0.001);
     mat4 rotationMat = rotationMatrix(vec3(0.0, 0.8, 1.2), -0.52);
     lightPos = rotationMat * lightPos;
-    //lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
-                                        //the geometry in the fragment shader.
+    lightPos = vec4(5, 5, 3, 1); 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
 
 
     // rotate about moon's axis
-    mat4 R1 = rotationMatrix(vec3(0.0, 1.0, 0.0), float(u_Time) * 3.14159 * 0.001);
+    mat4 R1 = rotationMatrix(vec3(0.0, 1.0, 0.0), float(u_Time) * 3.14159 * 0.005);
     mat4 T1 = mat4(1.0, 0.0, 0.0, 0.0,
                    0.0, 1.0, 0.0, 0.0,
                    0.0, 0.0, 1.0, 0.0,
@@ -86,7 +85,7 @@ void main()
     fs_Nor = T1 * R1 * T1_inverse * fs_Nor;
 
     // rotate about origin (main planet)
-    mat4 R2 = rotationMatrix(vec3(0.0, 1.1, 0.8), float(u_Time) * 3.14159 * 0.001);
+    mat4 R2 = rotationMatrix(vec3(0.0, 1.1, 0.8), float(u_Time) * 3.14159 * 0.0005);
     modelposition = R2 * modelposition;
     fs_Nor = R2 * fs_Nor;
 

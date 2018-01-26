@@ -94,71 +94,69 @@ vec3 PixelToGrid(vec3 pixel, float size) {
     return gridPos;
 }
 
-void main() {
-//#define BASIC
-//#define SUMMED
-//#define ABSOLUTE
-//#define RECURSIVE1
-#define RECURSIVE2
+float worleyNoise(vec3 gridPos, ivec3 cell) {
+    vec3 surroundingPoints[26]; // points within the 26 surrounding cells
 
+    int count = 0;
+    for (int i = cell.x - 1; i <= cell.x + 1; i++) {
+        for (int j = cell.y - 1; j <= cell.y + 1; j++) {
+            for (int k = cell.z -1; k <= cell.z + 1; k++) {
+             // get random vec3 from (-1, 1) based on current cell
+            vec3 randomP = random3(vec3(i, j, k));
+            randomP = (randomP + 1.f) / 2.f; // scale to (0, 1)
+            randomP = randomP + vec3(i, j, k); // get random point within current cellID
 
-#ifdef BASIC
-    // Basic Perlin noise
-    vec3 fragPos = vec3(fs_Pos);
-    vec3 gridPos = PixelToGrid(fragPos, 10.0);
-    float perlin = PerlinNoise(gridPos);
-    color = vec4(vec3((perlin + 1.0) * 0.5), 1.0);
-#endif
-
-#ifdef SUMMED
-    vec3 fragPos = vec3(fs_Pos);
-    float summedNoise = 0.0;
-    float amplitude = 0.5;
-    for(int i = 2; i <= 32; i *= 2) {
-        vec3 gridPos = PixelToGrid(fragPos, float(i));
-        //uv = vec2(cos(3.14159/3.0 * i) * uv.x - sin(3.14159/3.0 * i) * uv.y, sin(3.14159/3.0 * i) * uv.x + cos(3.14159/3.0 * i) * uv.y);
-        float perlin = abs(PerlinNoise(gridPos)) * amplitude;
-        summedNoise += perlin; // * amplitude;
-        amplitude *= 0.5;
+            surroundingPoints[count] = randomP;
+            count++;
+            }
+        }
     }
-    //color = vec3(summedNoise);//vec3((summedNoise + 1) * 0.5);
-    color = vec4(vec3(summedNoise + 0.3), 1.0);
-#endif
 
+    // find closest random point to current fragment
+    float minDistance = 9999999.f;
+    vec3 closestPoint = vec3(0.f, 0.f, 0.f);
+    for (int i = 0; i < surroundingPoints.length(); i++) {
+        float distance = sqrt(pow(surroundingPoints[i].x - gridPos.x, 2.0) + 
+                              pow(surroundingPoints[i].y - gridPos.y, 2.0) +
+                              pow(surroundingPoints[i].z - gridPos.z, 2.0));
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestPoint = surroundingPoints[i];
+        }
+    }
 
+    return minDistance;
+    
+}
 
-// use absoute1 to get.... wiggly space ////////////////////////////////////////////////
-
-#ifdef ABSOLUTE
-    vec2 uv = PixelToGrid(gl_FragCoord.xy, 10.0);
-    float perlin = PerlinNoise(uv);
-    color = vec3(1.0) - vec3(abs(perlin));
-//    color.r += step(0.98, fract(uv.x)) + step(0.98, fract(uv.y));
-#endif
-
-#ifdef RECURSIVE1
+void main() {
     vec3 fragPos = vec3(fs_Pos);
-    vec3 gridPos = PixelToGrid(fragPos, 10.0);
-    vec3 offset = vec3(PerlinNoise(gridPos + float(u_Time) * 0.01), PerlinNoise(gridPos + vec3(5.2, 1.3, 2.8)),
-        PerlinNoise(gridPos + vec3(1.8, 2.9, 6.1)));
-    float perlin = PerlinNoise(gridPos + offset);
-    color = vec4(vec3((perlin + 1.0) * 0.5), 1.0);
-#endif
+    vec3 diffuseColor = vec3(0.0);
 
-#ifdef RECURSIVE2
-    // Recursive Perlin noise (2 levels)
-    vec3 fragPos = vec3(fs_Pos);
-    vec3 gridPos = PixelToGrid(fragPos, 15.0);
-    vec3 offset1 = vec3(PerlinNoise(gridPos + cos(float(u_Time) * 3.14159 * 0.01)), 
-                        PerlinNoise(gridPos + vec3(5.2, 1.3, 2.8)),
-                        PerlinNoise(gridPos + vec3(1.8, 2.9, 6.1)));
-    vec3 offset2 = vec3(PerlinNoise(gridPos + offset1 + vec3(1.7, 9.2, 3.4)), 
-                        PerlinNoise(gridPos + sin(float(u_Time) * 3.14159 * 0.01) + offset1 + vec3(8.3, 2.8, 4.3)),
-                        PerlinNoise(gridPos + sin(float(u_Time) * 3.14159 * 0.01) + offset1 + vec3(2.3, 4.3, 6.7)));
-    float perlin = PerlinNoise(gridPos + offset2);
-    vec3 gradient = Gradient(perlin);
-    gradient = mix(gradient, vec3(perlin), length(offset1));
-    vec3 diffuseColor = gradient;
+    // worley noise
+    float numWorleyCells = 5.0;
+    vec3 worleyGridPos = PixelToGrid(fragPos, numWorleyCells);
+    ivec3 worleyCell = ivec3(worleyGridPos);
+
+    float minDistance = worleyNoise(worleyGridPos, worleyCell);
+
+    if (minDistance < 0.3) {
+        diffuseColor = vec3(0.2, 0.6, 0.1);
+    } else {
+    
+        // Recursive Perlin noise (2 levels)
+        vec3 perlinGridPos = PixelToGrid(fragPos, 15.0);
+        vec3 offset1 = vec3(PerlinNoise(perlinGridPos + cos(float(u_Time) * 3.14159 * 0.001)), 
+                            PerlinNoise(perlinGridPos + vec3(5.2, 1.3, 2.8)),
+                            PerlinNoise(perlinGridPos + vec3(1.8, 2.9, 6.1)));
+        vec3 offset2 = vec3(PerlinNoise(perlinGridPos + offset1 + vec3(1.7, 9.2, 3.4)), 
+                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.001) + offset1 + vec3(8.3, 2.8, 4.3)),
+                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.001) + offset1 + vec3(2.3, 4.3, 6.7)));
+        float perlin = PerlinNoise(perlinGridPos + offset2);
+        vec3 gradient = Gradient(perlin);
+        gradient = mix(gradient, vec3(perlin), length(offset1));
+        diffuseColor = gradient;
+    }
 
     // Calculate the diffuse term for Lambert shading
     float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
@@ -182,9 +180,5 @@ void main() {
         // Compute final shaded color
         color = vec4(diffuseColor * lightIntensity + specularColor * specularIntensity, 1.0);
     }
-#endif
 
-
-
-// use moving recrusive 1 for water of some kind 
 }
