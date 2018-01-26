@@ -8,6 +8,7 @@ import ShaderProgram from './ShaderProgram';
 class OpenGLRenderer {
   color: vec4 = vec4.fromValues(1, 0.78, 0.80, 1); // default geometry color
   time: number = 0;
+  animation: boolean = true;
 
   constructor(public canvas: HTMLCanvasElement) {
   }
@@ -25,6 +26,10 @@ class OpenGLRenderer {
     this.color = vec4.fromValues(color[0] / 255, color[1] / 255, color[2] / 255, 1);
   }
 
+  setAnimation(animateOn: boolean) {
+    this.animation = animateOn;
+  }
+
   clear() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
@@ -39,7 +44,11 @@ class OpenGLRenderer {
     prog.setGeometryColor(this.color);
 
     prog.setTime(this.time);
-    this.time++;
+
+    if (this.animation == true) {
+      this.time++;
+    }
+    
 
     for (let drawable of drawables) {
       prog.draw(drawable);

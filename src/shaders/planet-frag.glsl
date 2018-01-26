@@ -1,6 +1,7 @@
 #version 300 es
 
 precision highp float;
+precision mediump int;
 
 uniform int u_Time;
 
@@ -109,7 +110,6 @@ void main() {
     color = vec4(vec3((perlin + 1.0) * 0.5), 1.0);
 #endif
 
-// use Summed to get.... a moon ////////////////////////////////////////////////
 #ifdef SUMMED
     vec3 fragPos = vec3(fs_Pos);
     float summedNoise = 0.0;
@@ -148,7 +148,7 @@ void main() {
 #ifdef RECURSIVE2
     // Recursive Perlin noise (2 levels)
     vec3 fragPos = vec3(fs_Pos);
-    vec3 gridPos = PixelToGrid(fragPos, 10.0);
+    vec3 gridPos = PixelToGrid(fragPos, 15.0);
     vec3 offset1 = vec3(PerlinNoise(gridPos + cos(float(u_Time) * 3.14159 * 0.01)), 
                         PerlinNoise(gridPos + vec3(5.2, 1.3, 2.8)),
                         PerlinNoise(gridPos + vec3(1.8, 2.9, 6.1)));
@@ -160,16 +160,8 @@ void main() {
     gradient = mix(gradient, vec3(perlin), length(offset1));
     vec3 diffuseColor = gradient;
 
-
-    vec4 lightDirection = vec4(1.0);
-    lightDirection.x = 5.0 * sin(float(u_Time) * 3.14159 * 0.009);
-    lightDirection.y = 0.0;
-    lightDirection.z = 5.0 * cos(float(u_Time) * 3.14159 * 0.009);
-    mat4 rotationMat = rotationMatrix(vec3(0.0, 0.8, 1.2), -0.52);
-    lightDirection = rotationMat * lightDirection;
-
     // Calculate the diffuse term for Lambert shading
-    float diffuseTerm = dot(normalize(fs_Nor), normalize(lightDirection));
+    float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
     // Avoid negative lighting values
     diffuseTerm = clamp(diffuseTerm, 0.0, 1.0);
 
@@ -179,11 +171,17 @@ void main() {
     float lightIntensity = diffuseTerm + ambientTerm;  
 
     // blinn-phong term
-    float specularIntensity = max(pow(dot(normalize(lightDirection), normalize(fs_Nor)), 64.0), 0.0);
-    vec3 specularColor = vec3(0.9, 0.9, 1.0); // want specular color to be white
+    float specularIntensity = max(pow(dot(normalize(fs_LightVec), normalize(fs_Nor)), 64.0), 0.0);
 
-    // Compute final shaded color
-    color = vec4(diffuseColor * lightIntensity + specularColor * specularIntensity, 1.0);
+    // was getting weird specular reflection in shadow, so I made the part in shadow a lambert
+    if (dot(normalize(fs_Nor), normalize(fs_LightVec)) < 0.0) {
+        color = vec4(diffuseColor * lightIntensity, 1.0);
+    } else { // part not in shadow is a blinn-phong
+        vec3 specularColor = vec3(0.9, 0.9, 1.0); // want specular color to be white
+
+        // Compute final shaded color
+        color = vec4(diffuseColor * lightIntensity + specularColor * specularIntensity, 1.0);
+    }
 #endif
 
 

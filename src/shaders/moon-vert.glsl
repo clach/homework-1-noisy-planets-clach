@@ -1,4 +1,5 @@
 #version 300 es
+
 precision highp float;
 precision mediump int;
 
@@ -31,11 +32,8 @@ in vec4 vs_Col;             // The array of vertex colors passed to the shader.
 
 out vec4 fs_Pos;
 out vec4 fs_Nor;            // The array of normals that has been transformed by u_ModelInvTr. This is implicitly passed to the fragment shader.
-out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
 out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
-
-const vec4 lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
-                                        //the geometry in the fragment shader.
+out vec4 fs_LightVec;
 
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
@@ -56,23 +54,43 @@ void main()
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
 
     mat3 invTranspose = mat3(u_ModelInvTr);
-    fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
-                                                            // Transform the geometry's normals by the inverse transpose of the
-                                                            // model matrix. This is necessary to ensure the normals remain
-                                                            // perpendicular to the surface after the surface is transformed by
-                                                            // the model matrix.
-
+    fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);  
 
     vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
-    fs_Pos = modelposition;
 
-    mat4 R = rotationMatrix(vec3(0.0, 1.0, 0.0), float(u_Time) * 3.14159 * 0.0009);
+    fs_Pos = modelposition; // pass the model position (before rotating) to fragment shader
 
-    modelposition = R * modelposition;
-
+    // calculate light position and light direction
+    vec4 lightPos = vec4(1.0);
+    lightPos.x = 10.0 * sin(float(u_Time) * 3.14159 * 0.001);
+    lightPos.y = 0.0;
+    lightPos.z = 10.0 * cos(float(u_Time) * 3.14159 * 0.001);
+    mat4 rotationMat = rotationMatrix(vec3(0.0, 0.8, 1.2), -0.52);
+    lightPos = rotationMat * lightPos;
+    //lightPos = vec4(5, 5, 3, 1); //The position of our virtual light, which is used to compute the shading of
+                                        //the geometry in the fragment shader.
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
 
-    
+
+    // rotate about moon's axis
+    mat4 R1 = rotationMatrix(vec3(0.0, 1.0, 0.0), float(u_Time) * 3.14159 * 0.001);
+    mat4 T1 = mat4(1.0, 0.0, 0.0, 0.0,
+                   0.0, 1.0, 0.0, 0.0,
+                   0.0, 0.0, 1.0, 0.0,
+                   -2.0, 0.0, 0.0, 1.0);
+    mat4 T1_inverse = mat4(1.0, 0.0, 0.0, 0.0,
+                           0.0, 1.0, 0.0, 0.0,
+                           0.0, 0.0, 1.0, 0.0,
+                           2.0, 0.0, 0.0, 1.0);
+    modelposition = T1 * R1 * T1_inverse * modelposition;
+    fs_Nor = T1 * R1 * T1_inverse * fs_Nor;
+
+    // rotate about origin (main planet)
+    mat4 R2 = rotationMatrix(vec3(0.0, 1.1, 0.8), float(u_Time) * 3.14159 * 0.001);
+    modelposition = R2 * modelposition;
+    fs_Nor = R2 * fs_Nor;
+
+
 
     gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
                                              // used to render the final positions of the geometry's vertices

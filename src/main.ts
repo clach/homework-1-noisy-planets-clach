@@ -12,9 +12,9 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 6,
-  'Load Scene': loadScene, // A function pointer, essentially
-  'Color': [ 255, 180, 203]
+  'tesselations': 6,
+  'Lambert Color': [ 255, 180, 203],
+  'Animate': true
 };
 
 let planet: Icosphere;
@@ -44,12 +44,15 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  //gui.add(controls, 'tesselations', 0, 8).step(1);
-  //gui.add(controls, 'Load Scene');
-  var colorPicker = gui.addColor(controls, 'Color'); // color picker for gui
+  var colorPicker = gui.addColor(controls, 'Lambert Color'); // color picker for gui
+  var animateToggler = gui.add(controls, 'Animate');
 
   colorPicker.onChange(function(value : Float32Array) {
     renderer.setGeometryColor(value);
+  });
+
+  animateToggler.onChange(function(value : boolean) {
+    renderer.setAnimation(value);
   });
 
   // get canvas and webgl context
