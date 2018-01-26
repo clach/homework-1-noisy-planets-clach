@@ -14,7 +14,7 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 const controls = {
   'tesselations': 6,
   'Lambert Color': [ 255, 180, 203],
-  'Animate': true
+  'Animate': false
 };
 
 let planet: Icosphere;

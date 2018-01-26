@@ -131,6 +131,7 @@ void main()
 
     vec3 fragPos = vec3(fs_Pos);
 
+/*
     // worley noise
     float numWorleyCells = 5.0;
     vec3 worleyGridPos = PixelToGrid(fragPos, numWorleyCells);
@@ -140,7 +141,7 @@ void main()
 
     if (minDistance < 0.3) {
         modelposition = modelposition - 0.1 * minDistance * fs_Nor;
-    }
+    }*/
     
     //fs_Pos = modelposition;
 

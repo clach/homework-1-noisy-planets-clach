@@ -133,6 +133,7 @@ void main() {
     vec3 fragPos = vec3(fs_Pos);
     vec3 diffuseColor = vec3(0.0);
 
+/*
     // worley noise
     float numWorleyCells = 5.0;
     vec3 worleyGridPos = PixelToGrid(fragPos, numWorleyCells);
@@ -140,23 +141,23 @@ void main() {
 
     float minDistance = worleyNoise(worleyGridPos, worleyCell);
 
-    if (minDistance < 0.3) {
-        diffuseColor = vec3(0.2, 0.6, 0.1);
-    } else {
+    if (minDistance < 0.5) {
+        diffuseColor = vec3(minDistance, 0.1, 0.1);
+    } else {*/
     
         // Recursive Perlin noise (2 levels)
         vec3 perlinGridPos = PixelToGrid(fragPos, 15.0);
-        vec3 offset1 = vec3(PerlinNoise(perlinGridPos + cos(float(u_Time) * 3.14159 * 0.001)), 
+        vec3 offset1 = vec3(PerlinNoise(perlinGridPos + cos(float(u_Time) * 3.14159 * 0.005)), 
                             PerlinNoise(perlinGridPos + vec3(5.2, 1.3, 2.8)),
                             PerlinNoise(perlinGridPos + vec3(1.8, 2.9, 6.1)));
         vec3 offset2 = vec3(PerlinNoise(perlinGridPos + offset1 + vec3(1.7, 9.2, 3.4)), 
-                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.001) + offset1 + vec3(8.3, 2.8, 4.3)),
-                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.001) + offset1 + vec3(2.3, 4.3, 6.7)));
+                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.005) + offset1 + vec3(8.3, 2.8, 4.3)),
+                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.005) + offset1 + vec3(2.3, 4.3, 6.7)));
         float perlin = PerlinNoise(perlinGridPos + offset2);
         vec3 gradient = Gradient(perlin);
         gradient = mix(gradient, vec3(perlin), length(offset1));
         diffuseColor = gradient;
-    }
+    //}
 
     // Calculate the diffuse term for Lambert shading
     float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));

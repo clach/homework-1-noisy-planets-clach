@@ -10,6 +10,8 @@ in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 
+in float worleyDistance;
+
 out vec4 color;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
@@ -81,7 +83,9 @@ vec3 PixelToGrid(vec3 pixel, float size) {
 }
 
 void main() {
+
     vec3 fragPos = vec3(fs_Pos);
+        
     float summedNoise = 0.0;
     float amplitude = 0.5;
     for(int i = 2; i <= 32; i *= 2) {
@@ -92,6 +96,12 @@ void main() {
     }
 
     vec3 diffuseColor = vec3(summedNoise);
+    if (worleyDistance <= 0.5) {
+        diffuseColor.r = mix(diffuseColor.r, diffuseColor.r - 0.1, 1.0 - (worleyDistance / 0.5));
+        diffuseColor.g = mix(diffuseColor.g, diffuseColor.g - 0.1, 1.0 - (worleyDistance / 0.5));
+        diffuseColor.b = mix(diffuseColor.b, diffuseColor.b - 0.1, 1.0 - (worleyDistance / 0.5));
+    } 
+    
     diffuseColor = vec3(clamp(diffuseColor.x + 0.6, 0.0, 1.0), 
                           clamp(diffuseColor.y + 0.3, 0.0, 1.0), 
                           clamp(diffuseColor.z - 0.3, 0.0, 1.0));
