@@ -14,23 +14,28 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 const controls = {
   'tesselations': 6,
   'Lambert Color': [ 255, 180, 203],
-  'Animate': false
+  'Animation': true,
+  'Surface Movement': false,
+  'Animation Speed': 3
 };
 
 let planet: Icosphere;
 let moon: Icosphere;
 let square: Square;
 let cube: Cube;
+let space: Square;
 
 function loadScene() {
   planet = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
   planet.create();
-  moon = new Icosphere(vec3.fromValues(-2, 0, 0), 0.3, controls.tesselations);
+  moon = new Icosphere(vec3.fromValues(-4, 0, 0), 0.3, controls.tesselations);
   moon.create();
   square = new Square(vec3.fromValues(0, 0, 0));
   square.create();
   cube = new Cube();
   cube.create();
+  space = new Square(vec3.fromValues(0, 0, 0));
+  space.create();
 }
 
 function main() {
@@ -45,7 +50,9 @@ function main() {
   // Add controls to the gui
   const gui = new DAT.GUI();
   var colorPicker = gui.addColor(controls, 'Lambert Color'); // color picker for gui
-  var animateToggler = gui.add(controls, 'Animate');
+  var animateToggler = gui.add(controls, 'Animation');
+  var landMoveToggler = gui.add(controls, 'Surface Movement');
+  var animationSpeed = gui.add(controls, 'Animation Speed', 0, 10)
 
   colorPicker.onChange(function(value : Float32Array) {
     renderer.setGeometryColor(value);
@@ -55,6 +62,14 @@ function main() {
     renderer.setAnimation(value);
   });
 
+  landMoveToggler.onChange(function(value : boolean) {
+    renderer.setLandAnimation(value);
+  });
+
+  animationSpeed.onChange(function(value : number) {
+    renderer.setAnimationSpeed(value);
+  });
+  
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
   const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');

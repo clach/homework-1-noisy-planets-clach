@@ -9,6 +9,9 @@ class OpenGLRenderer {
   color: vec4 = vec4.fromValues(1, 0.78, 0.80, 1); // default geometry color
   time: number = 0;
   animation: boolean = true;
+  landTime: number = 0;
+  landAnimation: boolean = false;
+  animationSpeed: number = 5;
 
   constructor(public canvas: HTMLCanvasElement) {
   }
@@ -30,6 +33,14 @@ class OpenGLRenderer {
     this.animation = animateOn;
   }
 
+  setLandAnimation(landAnimateOn: boolean) {
+    this.landAnimation = landAnimateOn;
+  }
+
+  setAnimationSpeed(speed: number) {
+    this.animationSpeed = speed;
+  }
+
   clear() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }
@@ -43,10 +54,14 @@ class OpenGLRenderer {
     prog.setViewProjMatrix(viewProj);
     prog.setGeometryColor(this.color);
 
-    prog.setTime(this.time);
+    prog.setLandMoveTime(this.landTime);
+    if (this.landAnimation == true) {
+      this.landTime += this.animationSpeed;
+    }
 
+    prog.setTime(this.time);
     if (this.animation == true) {
-      this.time++;
+      this.time += this.animationSpeed;
     }
     
 

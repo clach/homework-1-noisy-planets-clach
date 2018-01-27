@@ -144,15 +144,15 @@ void main()
 
 
     // rotate about moon's axis
-    mat4 R1 = rotationMatrix(vec3(0.0, 1.0, 0.0), float(u_Time) * 3.14159 * 0.005);
+    mat4 R1 = rotationMatrix(vec3(0.0, 1.0, 0.0), float(u_Time) * 3.14159 * 0.002);
     mat4 T1 = mat4(1.0, 0.0, 0.0, 0.0,
                    0.0, 1.0, 0.0, 0.0,
                    0.0, 0.0, 1.0, 0.0,
-                   -2.0, 0.0, 0.0, 1.0);
+                   -4.0, 0.0, 0.0, 1.0);
     mat4 T1_inverse = mat4(1.0, 0.0, 0.0, 0.0,
                            0.0, 1.0, 0.0, 0.0,
                            0.0, 0.0, 1.0, 0.0,
-                           2.0, 0.0, 0.0, 1.0);
+                           4.0, 0.0, 0.0, 1.0);
     modelposition = T1 * R1 * T1_inverse * modelposition;
     fs_Nor = T1 * R1 * T1_inverse * fs_Nor;
 

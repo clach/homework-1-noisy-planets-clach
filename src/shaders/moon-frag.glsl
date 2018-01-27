@@ -103,7 +103,7 @@ void main() {
     } 
     
     diffuseColor = vec3(clamp(diffuseColor.x + 0.6, 0.0, 1.0), 
-                          clamp(diffuseColor.y + 0.3, 0.0, 1.0), 
+                          clamp(diffuseColor.y + 0.2, 0.0, 1.0), 
                           clamp(diffuseColor.z - 0.3, 0.0, 1.0));
 
     // Calculate the diffuse term for Lambert shading

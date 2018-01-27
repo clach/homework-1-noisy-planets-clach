@@ -1,4 +1,4 @@
-import {vec2, vec4, mat4} from 'gl-matrix';
+import {vec2, vec3, vec4, mat4} from 'gl-matrix';
 import Drawable from './Drawable';
 import {gl} from '../../globals';
 
@@ -31,6 +31,7 @@ class ShaderProgram {
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
   unifDimensions: WebGLUniformLocation;
+  unifLandMoveTime: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -46,13 +47,14 @@ class ShaderProgram {
     this.attrPos = gl.getAttribLocation(this.prog, "vs_Pos");
     this.attrNor = gl.getAttribLocation(this.prog, "vs_Nor");
     this.attrCol = gl.getAttribLocation(this.prog, "vs_Col");
-
+    
     this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");
     this.unifModelInvTr = gl.getUniformLocation(this.prog, "u_ModelInvTr");
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime = gl.getUniformLocation(this.prog, "u_Time");
     this.unifDimensions = gl.getUniformLocation(this.prog, "u_Dimensions");
+    this.unifLandMoveTime = gl.getUniformLocation(this.prog, "u_LandMoveTime");
   }
 
   use() {
@@ -101,6 +103,13 @@ class ShaderProgram {
     this.use();
     if(this.unifDimensions !== -1) {
         gl.uniform2fv(this.unifDimensions, dims);
+    }
+  }
+
+  setLandMoveTime(landMoveTime: number) {
+    this.use();
+    if(this.unifLandMoveTime !== -1) {
+        gl.uniform1i(this.unifLandMoveTime, landMoveTime);
     }
   }
 

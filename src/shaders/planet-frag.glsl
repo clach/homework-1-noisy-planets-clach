@@ -10,10 +10,14 @@ in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 
+in float fbmHeight;
+
+uniform int u_LandMoveTime;
+
 out vec4 color;
 
-const vec3 a = vec3(0.0, 0.2, 0.8);
-const vec3 b = vec3(0.2, 0.4, 0.4);
+const vec3 a = vec3(0.0, 80.0, 120.0) / 255.0;
+const vec3 b = vec3(0.1, 0.1, 0.1);
 const vec3 c = vec3(0.5, 0.5, 0.5);
 const vec3 d = vec3(0.0, 0.9, 0.7);
 
@@ -147,17 +151,52 @@ void main() {
     
         // Recursive Perlin noise (2 levels)
         vec3 perlinGridPos = PixelToGrid(fragPos, 15.0);
-        vec3 offset1 = vec3(PerlinNoise(perlinGridPos + cos(float(u_Time) * 3.14159 * 0.005)), 
+        vec3 offset1 = vec3(PerlinNoise(perlinGridPos + cos(float(u_Time) * 3.14159 * 0.001)), 
                             PerlinNoise(perlinGridPos + vec3(5.2, 1.3, 2.8)),
                             PerlinNoise(perlinGridPos + vec3(1.8, 2.9, 6.1)));
         vec3 offset2 = vec3(PerlinNoise(perlinGridPos + offset1 + vec3(1.7, 9.2, 3.4)), 
-                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.005) + offset1 + vec3(8.3, 2.8, 4.3)),
-                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.005) + offset1 + vec3(2.3, 4.3, 6.7)));
+                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.001) + offset1 + vec3(8.3, 2.8, 4.3)),
+                            PerlinNoise(perlinGridPos + sin(float(u_Time) * 3.14159 * 0.001) + offset1 + vec3(2.3, 4.3, 6.7)));
         float perlin = PerlinNoise(perlinGridPos + offset2);
         vec3 gradient = Gradient(perlin);
         gradient = mix(gradient, vec3(perlin), length(offset1));
         diffuseColor = gradient;
     //}
+
+    vec3 shoreColor = vec3(190.0, 150.0, 110.0) / 255.0;
+    vec3 bottomGreen = vec3(0.0, 0.1, 0.0);
+    vec3 topGreen = vec3(0.5, 1.0, 0.5);
+
+    if (fbmHeight > 0.5) {
+        if (fbmHeight < 0.55) {
+            float scaledFbmHeight = (fbmHeight - 0.5) * 20.0;
+            diffuseColor = mix(shoreColor, bottomGreen, scaledFbmHeight);
+
+        } else {
+       
+            float scaledFbmHeight = (fbmHeight - 0.55) * 2.222222;
+            diffuseColor = mix(bottomGreen, topGreen, scaledFbmHeight);
+        }
+
+    // Calculate the diffuse term for Lambert shading
+    float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
+    // Avoid negative lighting values
+    diffuseTerm = clamp(diffuseTerm, 0.0, 1.0);
+
+    float ambientTerm = 0.15; // ambient lighting (so shadows aren't black)
+
+    // lambertian term
+    float lightIntensity = diffuseTerm + ambientTerm;  
+
+    color = vec4(diffuseColor * lightIntensity, 1.0);
+
+   } else {
+
+      if (fbmHeight > 0.49) {
+          float shoreScale = (fbmHeight - 0.49) * 100.0;
+          diffuseColor = mix(diffuseColor, shoreColor, shoreScale);
+
+      } 
 
     // Calculate the diffuse term for Lambert shading
     float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
@@ -181,5 +220,6 @@ void main() {
         // Compute final shaded color
         color = vec4(diffuseColor * lightIntensity + specularColor * specularIntensity, 1.0);
     }
+   }
 
 }
