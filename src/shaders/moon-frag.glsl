@@ -88,7 +88,7 @@ void main() {
         
     float summedNoise = 0.0;
     float amplitude = 0.5;
-    for(int i = 2; i <= 32; i *= 2) {
+    for (int i = 2; i <= 32; i *= 2) {
         vec3 gridPos = PixelToGrid(fragPos, float(i));
         float perlin = abs(PerlinNoise(gridPos));
         summedNoise += perlin * amplitude;

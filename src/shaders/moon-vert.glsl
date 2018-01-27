@@ -133,15 +133,8 @@ void main()
     } 
 
     // calculate light position and light direction
-    vec4 lightPos = vec4(1.0);
-    lightPos.x = 10.0 * sin(float(u_Time) * 3.14159 * 0.001);
-    lightPos.y = 0.0;
-    lightPos.z = 10.0 * cos(float(u_Time) * 3.14159 * 0.001);
-    mat4 rotationMat = rotationMatrix(vec3(0.0, 0.8, 1.2), -0.52);
-    lightPos = rotationMat * lightPos;
-    lightPos = vec4(5, 5, 3, 1); 
+    vec4 lightPos = vec4(5, 5, 3, 1); 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies
-
 
     // rotate about moon's axis
     mat4 R1 = rotationMatrix(vec3(0.0, 1.0, 0.0), float(u_Time) * 3.14159 * 0.002);
