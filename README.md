@@ -10,6 +10,7 @@ https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83 (noise functio
 http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/ (function to make a rotation matrix)
 
 Link:
+Please forgive me, I broke my link (it links to the base code rather than my actual stuff).
 https://clach.github.io/homework-1-noisy-planets-clach/
 
 Screenshot:
