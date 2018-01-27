@@ -119,7 +119,7 @@ void main()
 
     // worley noise
     vec3 fragPos = vec3(fs_Pos);
-    float numWorleyCells = 5.0;
+    float numWorleyCells = 4.0;
     vec3 worleyGridPos = PixelToGrid(fragPos, numWorleyCells);
     ivec3 worleyCell = ivec3(worleyGridPos);
 
