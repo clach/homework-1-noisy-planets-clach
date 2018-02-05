@@ -13,7 +13,6 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   'tesselations': 6,
-  'Lambert Color': [ 255, 180, 203],
   'Animation': true,
   'Surface Movement': false,
   'Animation Speed': 3
@@ -49,14 +48,9 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  var colorPicker = gui.addColor(controls, 'Lambert Color'); // color picker for gui
   var animateToggler = gui.add(controls, 'Animation');
   var landMoveToggler = gui.add(controls, 'Surface Movement');
-  var animationSpeed = gui.add(controls, 'Animation Speed', 0, 10)
-
-  colorPicker.onChange(function(value : Float32Array) {
-    renderer.setGeometryColor(value);
-  });
+  var animationSpeed = gui.add(controls, 'Animation Speed', 0, 10);
 
   animateToggler.onChange(function(value : boolean) {
     renderer.setAnimation(value);
