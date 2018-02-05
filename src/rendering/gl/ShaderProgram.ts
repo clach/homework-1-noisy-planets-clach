@@ -32,6 +32,7 @@ class ShaderProgram {
   unifTime: WebGLUniformLocation;
   unifDimensions: WebGLUniformLocation;
   unifLandMoveTime: WebGLUniformLocation;
+  unifAspectRatio: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -55,6 +56,8 @@ class ShaderProgram {
     this.unifTime = gl.getUniformLocation(this.prog, "u_Time");
     this.unifDimensions = gl.getUniformLocation(this.prog, "u_Dimensions");
     this.unifLandMoveTime = gl.getUniformLocation(this.prog, "u_LandMoveTime");
+    this.unifAspectRatio   = gl.getUniformLocation(this.prog, "u_AspectRatio");
+
   }
 
   use() {
@@ -110,6 +113,13 @@ class ShaderProgram {
     this.use();
     if(this.unifLandMoveTime !== -1) {
         gl.uniform1i(this.unifLandMoveTime, landMoveTime);
+    }
+  }
+
+  setAspectRatio(size: vec2) {
+    this.use();
+    if (this.unifAspectRatio !== -1) {
+      gl.uniform2fv(this.unifAspectRatio, size);
     }
   }
 

@@ -1,4 +1,4 @@
-import {vec3} from 'gl-matrix';
+import {vec2, vec3} from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
 import Icosphere from './geometry/Icosphere';
@@ -109,6 +109,13 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/moon-frag.glsl')),
   ]);
 
+  const spaceShader = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/space-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/space-frag.glsl')),
+  ]);
+
+  spaceShader.setAspectRatio(vec2.fromValues(window.innerWidth, window.innerHeight));
+
   // This function will be called every frame
   function tick() {
     camera.update();
@@ -118,6 +125,7 @@ function main() {
 
     renderer.render(camera, planetShader, [ planet ]);
     renderer.render(camera, moonShader, [ moon ]);
+    renderer.render(camera, spaceShader, [ space ]);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
