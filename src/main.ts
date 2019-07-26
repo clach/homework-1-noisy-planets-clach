@@ -1,4 +1,4 @@
-import {vec3} from 'gl-matrix';
+import {vec2, vec3} from 'gl-matrix';
 import * as Stats from 'stats-js';
 import * as DAT from 'dat-gui';
 import Icosphere from './geometry/Icosphere';
@@ -13,7 +13,6 @@ import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   'tesselations': 6,
-  'Lambert Color': [ 255, 180, 203],
   'Animation': true,
   'Surface Movement': false,
   'Animation Speed': 3
@@ -49,14 +48,9 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  var colorPicker = gui.addColor(controls, 'Lambert Color'); // color picker for gui
   var animateToggler = gui.add(controls, 'Animation');
   var landMoveToggler = gui.add(controls, 'Surface Movement');
-  var animationSpeed = gui.add(controls, 'Animation Speed', 0, 10)
-
-  colorPicker.onChange(function(value : Float32Array) {
-    renderer.setGeometryColor(value);
-  });
+  var animationSpeed = gui.add(controls, 'Animation Speed', 0, 10);
 
   animateToggler.onChange(function(value : boolean) {
     renderer.setAnimation(value);
@@ -109,6 +103,13 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/moon-frag.glsl')),
   ]);
 
+  const spaceShader = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/space-vert.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/space-frag.glsl')),
+  ]);
+
+  spaceShader.setAspectRatio(vec2.fromValues(window.innerWidth, window.innerHeight));
+
   // This function will be called every frame
   function tick() {
     camera.update();
@@ -118,6 +119,7 @@ function main() {
 
     renderer.render(camera, planetShader, [ planet ]);
     renderer.render(camera, moonShader, [ moon ]);
+    renderer.render(camera, spaceShader, [ space ]);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame
